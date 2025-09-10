@@ -6,17 +6,16 @@ import com.cineverse.entity.User;
 import com.cineverse.exception.SeatsUnavailableException;
 import com.cineverse.repository.BookingRepository;
 import com.cineverse.repository.ShowTimeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class TicketBookingService implements IBookable {
 
-    @Autowired
-    private BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
+    private final ShowTimeRepository showTimeRepository;
 
-    @Autowired
-    private ShowTimeRepository showTimeRepository;
+    public TicketBookingService(BookingRepository bookingRepository, ShowTimeRepository showTimeRepository) {
+        this.bookingRepository = bookingRepository;
+        this.showTimeRepository = showTimeRepository;
+    }
 
     @Override
     public Booking bookTickets(User user, ShowTime showTime, Integer seatCount) {

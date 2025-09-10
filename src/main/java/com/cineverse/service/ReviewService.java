@@ -7,19 +7,18 @@ import com.cineverse.exception.DuplicateReviewException;
 import com.cineverse.exception.InvalidRatingException;
 import com.cineverse.repository.MovieRepository;
 import com.cineverse.repository.ReviewRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service
 public class ReviewService {
 
-    @Autowired
-    private ReviewRepository reviewRepository;
+    private final ReviewRepository reviewRepository;
+    private final MovieRepository movieRepository;
 
-    @Autowired
-    private MovieRepository movieRepository;
+    public ReviewService(ReviewRepository reviewRepository, MovieRepository movieRepository) {
+        this.reviewRepository = reviewRepository;
+        this.movieRepository = movieRepository;
+    }
 
     public Review addReview(User user, Long movieId, String comment, int rating) {
         if (rating < 1 || rating > 5) {

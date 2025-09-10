@@ -7,19 +7,18 @@ import com.cineverse.exception.BookingNotFoundException;
 import com.cineverse.exception.SeatsUnavailableException;
 import com.cineverse.repository.BookingRepository;
 import com.cineverse.repository.ShowTimeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class BookingService {
 
-    @Autowired
-    private BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
+    private final ShowTimeRepository showTimeRepository;
 
-    @Autowired
-    private ShowTimeRepository showTimeRepository;
+    public BookingService(BookingRepository bookingRepository, ShowTimeRepository showTimeRepository) {
+        this.bookingRepository = bookingRepository;
+        this.showTimeRepository = showTimeRepository;
+    }
 
     public Booking createBooking(User user, Long showTimeId, int seatCount) {
         ShowTime showTime = showTimeRepository.findById(showTimeId)

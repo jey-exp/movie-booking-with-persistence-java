@@ -6,14 +6,14 @@ import com.cineverse.exception.InvalidCredentialsException;
 import com.cineverse.exception.UserAlreadyExistsException;
 import com.cineverse.exception.UserNotFoundException;
 import com.cineverse.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public User registerUser(String name, String email, String password) {
         if (userRepository.findByEmail(email).isPresent()) {

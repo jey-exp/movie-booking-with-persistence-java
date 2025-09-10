@@ -6,35 +6,25 @@ import com.cineverse.exception.InvalidShowTimeException;
 import com.cineverse.exception.MovieNotFoundException;
 import com.cineverse.repository.MovieRepository;
 import com.cineverse.repository.ShowTimeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
 public class ShowTimeService {
 
-    @Autowired
-    private ShowTimeRepository showTimeRepository;
+    private final ShowTimeRepository showTimeRepository;
+    private final MovieRepository movieRepository;
 
-    @Autowired
-    private MovieRepository movieRepository;
+    public ShowTimeService(ShowTimeRepository showTimeRepository, MovieRepository movieRepository) {
+        this.showTimeRepository = showTimeRepository;
+        this.movieRepository = movieRepository;
+    }
 
-    public ShowTime addShowTime(Long movieId, LocalDateTime showTime, int availableSeats) {
-        if (showTime.isBefore(LocalDateTime.now())) {
+    public ShowTime addShowTime(ShowTime showTime) {
+        if (showTime.getShowTime().isBefore(LocalDateTime.now())) {
             throw new InvalidShowTimeException("Show time cannot be in the past.");
         }
-
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new MovieNotFoundException("Movie not found with id: " + movieId));
-
-        ShowTime newShowTime = new ShowTime();
-        newShowTime.setMovie(movie);
-        newShowTime.setShowTime(showTime);
-        newShowTime.setAvailableSeats(availableSeats);
-
-        return showTimeRepository.save(newShowTime);
+        return showTimeRepository.save(showTime);
     }
 
     public List<ShowTime> getShowTimesForMovie(Long movieId) {
