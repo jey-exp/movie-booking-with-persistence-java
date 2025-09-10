@@ -9,6 +9,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -26,6 +28,9 @@ public class CineverseApplication implements CommandLineRunner {
 
     @Autowired
     private BookingService bookingService;
+
+    @Autowired
+    private ShowTimeService showTimeService;
 
     @Autowired
     private UserRepository userRepository;
@@ -118,7 +123,8 @@ public class CineverseApplication implements CommandLineRunner {
             System.out.println("2. Update Movie");
             System.out.println("3. Remove Movie");
             System.out.println("4. View All Movies");
-            System.out.println("5. Logout");
+            System.out.println("5. Manage Showtimes");
+            System.out.println("6. Logout");
             System.out.print("Choose an option: ");
 
             int choice = scanner.nextInt();
@@ -138,6 +144,9 @@ public class CineverseApplication implements CommandLineRunner {
                     viewAllMovies();
                     break;
                 case 5:
+                    manageShowtimes(scanner);
+                    break;
+                case 6:
                     return;
                 default:
                     System.out.println("Invalid option. Please try again.");
@@ -148,7 +157,7 @@ public class CineverseApplication implements CommandLineRunner {
     private void showUserMenu(Scanner scanner, User user) {
         while (true) {
             System.out.println("\nUser Menu:");
-            System.out.println("1. View All Movies");
+            System.out.println("1. View All Movies and Showtimes");
             System.out.println("2. Book a Ticket");
             System.out.println("3. Add a Review");
             System.out.println("4. View My Bookings");
@@ -250,9 +259,73 @@ public class CineverseApplication implements CommandLineRunner {
 
     private void viewAllMovies() {
         List<Movie> movies = movieService.getAllMovies();
-        System.out.println("\nAll Movies:");
+        System.out.println("\n--- All Movies ---");
         for (Movie movie : movies) {
-            System.out.println(movie.getId() + ": " + movie.getTitle() + " (" + movie.getGenre() + ")");
+            System.out.println("\nMovie ID: " + movie.getId() + ", Title: " + movie.getTitle() + " (" + movie.getGenre() + ")");
+            System.out.println("  Showtimes:");
+            List<ShowTime> showTimes = showTimeService.getShowTimesForMovie(movie.getId());
+            if (showTimes.isEmpty()) {
+                System.out.println("    No showtimes available.");
+            } else {
+                for (ShowTime st : showTimes) {
+                    System.out.println("    - ID: " + st.getId() + ", Time: " + st.getShowTime() + ", Seats: " + st.getAvailableSeats());
+                }
+            }
+        }
+    }
+
+    private void manageShowtimes(Scanner scanner) {
+        System.out.println("\nManage Showtimes:");
+        System.out.println("1. Add Showtime");
+        System.out.println("2. View Showtimes for a Movie");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:
+                addShowtime(scanner);
+                break;
+            case 2:
+                viewShowtimesForMovie(scanner);
+                break;
+            default:
+                System.out.println("Invalid option.");
+        }
+    }
+
+    private void addShowtime(Scanner scanner) {
+        System.out.print("Enter movie ID: ");
+        long movieId = scanner.nextLong();
+        scanner.nextLine();
+        System.out.print("Enter show time (YYYY-MM-DDTHH:MM): ");
+        String timeStr = scanner.nextLine();
+        LocalDateTime showTime = LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        System.out.print("Enter available seats: ");
+        int seats = scanner.nextInt();
+        scanner.nextLine();
+
+        try {
+            showTimeService.addShowTime(movieId, showTime, seats);
+            System.out.println("Showtime added successfully!");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void viewShowtimesForMovie(Scanner scanner) {
+        System.out.print("Enter movie ID: ");
+        long movieId = scanner.nextLong();
+        scanner.nextLine();
+
+        try {
+            List<ShowTime> showTimes = showTimeService.getShowTimesForMovie(movieId);
+            System.out.println("\nShowtimes for Movie ID " + movieId + ":");
+            for (ShowTime st : showTimes) {
+                System.out.println("  - ID: " + st.getId() + ", Time: " + st.getShowTime() + ", Seats: " + st.getAvailableSeats());
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
